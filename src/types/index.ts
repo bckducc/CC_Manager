@@ -1,37 +1,154 @@
-export interface StatCard {
-  label: string;
-  value: string | number;
-  sub?: string;
-  icon: string;
-  color: string;
-  bg: string;
-}
+// ─── Navigation ──────────────────────────────────────────────────────────────
+export type TabId =
+  | "dashboard"
+  | "rooms"
+  | "contracts"
+  | "utilities"
+  | "invoices"
+  | "services"
+  | "accounts"
+  | "payments";
 
-export interface ApartmentUnit {
+// ─── Rooms ───────────────────────────────────────────────────────────────────
+export type RoomStatus = "occupied" | "vacant" | "maintenance" | "reserved";
+export type RoomType = "single" | "double" | "studio" | "penthouse";
+
+export interface Room {
   id: string;
+  number: string;
   floor: number;
-  room: string;
-  tenant: string;
-  status: "occupied" | "vacant" | "maintenance";
-  rent: number;
-  dueDate?: string;
+  type: RoomType;
+  status: RoomStatus;
+  area: number; // m²
+  baseRent: number; // VND/month
+  maxOccupants: number;
+  amenities: string[];
+  description?: string;
+  tenantId?: string;
+  contractId?: string;
 }
 
-export interface Notification {
-  id: number;
-  type: "warning" | "info" | "success" | "danger";
-  message: string;
-  time: string;
+// ─── Tenants / Accounts ──────────────────────────────────────────────────────
+export type AccountRole = "admin" | "staff" | "tenant";
+export type AccountStatus = "active" | "inactive" | "suspended";
+export type Gender = "male" | "female" | "other";
+
+export interface Account {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  avatar?: string;
+  role: AccountRole;
+  status: AccountStatus;
+  gender: Gender;
+  dob?: string;
+  idNumber?: string;
+  address?: string;
+  roomId?: string;
+  createdAt: string;
+  lastLogin?: string;
+}
+
+// ─── Contracts ───────────────────────────────────────────────────────────────
+export type ContractStatus = "active" | "expired" | "terminated" | "pending";
+
+export interface Contract {
+  id: string;
+  roomId: string;
+  tenantId: string;
+  startDate: string;
+  endDate: string;
+  monthlyRent: number;
+  deposit: number;
+  status: ContractStatus;
+  terms?: string;
+  createdAt: string;
+  renewalCount: number;
+}
+
+// ─── Utilities ───────────────────────────────────────────────────────────────
+export type UtilityType = "electricity" | "water" | "internet" | "parking";
+
+export interface UtilityReading {
+  id: string;
+  roomId: string;
+  type: UtilityType;
+  month: string; // "YYYY-MM"
+  previousReading: number;
+  currentReading: number;
+  consumption: number;
+  unitPrice: number;
+  totalAmount: number;
+  recordedAt: string;
+  recordedBy: string;
+}
+
+// ─── Services ────────────────────────────────────────────────────────────────
+export type ServiceStatus = "available" | "unavailable";
+export type ServiceCategory = "cleaning" | "maintenance" | "laundry" | "parking" | "security" | "other";
+
+export interface Service {
+  id: string;
+  name: string;
+  category: ServiceCategory;
+  price: number;
+  unit: string; // "lần", "tháng", "giờ"
+  status: ServiceStatus;
+  description?: string;
 }
 
 export interface ServiceRequest {
-  id: number;
-  unit: string;
-  tenant: string;
-  issue: string;
-  priority: "high" | "medium" | "low";
-  date: string;
+  id: string;
+  serviceId: string;
+  roomId: string;
+  tenantId: string;
+  requestDate: string;
+  scheduledDate?: string;
+  status: "pending" | "confirmed" | "inprogress" | "completed" | "cancelled";
+  note?: string;
+  amount: number;
 }
 
-export type TabType = "overview" | "units" | "requests";
-export type FilterStatus = "all" | ApartmentUnit["status"];
+// ─── Invoices ────────────────────────────────────────────────────────────────
+export type InvoiceStatus = "unpaid" | "paid" | "overdue" | "partial";
+export type InvoiceType = "monthly" | "utility" | "service" | "deposit" | "penalty";
+
+export interface InvoiceItem {
+  label: string;
+  quantity: number;
+  unitPrice: number;
+  amount: number;
+}
+
+export interface Invoice {
+  id: string;
+  roomId: string;
+  tenantId: string;
+  contractId?: string;
+  type: InvoiceType;
+  month: string; // "YYYY-MM"
+  issueDate: string;
+  dueDate: string;
+  items: InvoiceItem[];
+  totalAmount: number;
+  paidAmount: number;
+  status: InvoiceStatus;
+  note?: string;
+}
+
+// ─── Payments ────────────────────────────────────────────────────────────────
+export type PaymentMethod = "cash" | "transfer" | "momo" | "vnpay" | "card";
+
+export interface Payment {
+  id: string;
+  invoiceId: string;
+  roomId: string;
+  tenantId: string;
+  amount: number;
+  method: PaymentMethod;
+  paidAt: string;
+  receivedBy: string;
+  note?: string;
+  transactionRef?: string;
+}
