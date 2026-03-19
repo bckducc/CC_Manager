@@ -1,6 +1,7 @@
 import type { TabId, Account } from "../../types";
 import { NAV_ITEMS, BRAND } from "../../constants";
 import { Avatar } from "../ui";
+import { useState } from "react";
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 interface SidebarProps {
@@ -16,81 +17,121 @@ export function Sidebar({ active, onNavigate, onLogout }: SidebarProps) {
     { id: "admin",   label: "Hệ thống" },
   ] as const;
 
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
   return (
-    <aside style={{
-      width: 226, flexShrink: 0,
-      background: BRAND.primary,
-      display: "flex", flexDirection: "column",
-      height: "100vh", position: "sticky", top: 0, overflowY: "auto",
-    }}>
-      {/* Logo */}
-      <div style={{ padding: "24px 18px 20px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <>
+      <aside style={{
+        width: isSidebarCollapsed ? 60 : 226, // Adjust width based on state
+        flexShrink: 0,
+        background: BRAND.primary,
+        display: "flex", flexDirection: "column",
+        height: "100vh", position: "sticky", top: 0, overflowY: "auto",
+      }}>
+        {/* Logo */}
+        <div style={{
+          padding: isSidebarCollapsed ? "10px" : "24px 18px 20px",
+          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: isSidebarCollapsed ? "center" : "flex-start",
+          gap: isSidebarCollapsed ? 0 : 10,
+        }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10, background: "#2563eb",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 17, flexShrink: 0,
-          }}>🏢</div>
-          <div>
-            <div style={{ color: "#fff", fontWeight: 800, fontSize: 14.5, letterSpacing: "-0.02em" }}>MiniApart</div>
-            <div style={{ color: "rgba(255,255,255,0.38)", fontSize: 10, marginTop: 1 }}>Hệ thống quản lý</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Nav */}
-      <nav style={{ flex: 1, padding: "12px 10px" }}>
-        {groups.map(grp => {
-          const items = NAV_ITEMS.filter(n => n.group === grp.id);
-          return (
-            <div key={grp.id} style={{ marginBottom: 6 }}>
-              <div style={{
-                fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.3)",
-                letterSpacing: "0.1em", textTransform: "uppercase",
-                padding: "10px 10px 5px",
-              }}>{grp.label}</div>
-              {items.map(item => {
-                const isActive = active === item.id;
-                return (
-                  <button key={item.id} onClick={() => onNavigate(item.id)} style={{
-                    display: "flex", alignItems: "center", gap: 9,
-                    width: "100%", padding: "9px 10px", borderRadius: 8,
-                    border: "none", cursor: "pointer", marginBottom: 1,
-                    background: isActive ? "rgba(37,99,235,0.25)" : "transparent",
-                    color: isActive ? "#93c5fd" : "rgba(255,255,255,0.55)",
-                    fontWeight: isActive ? 600 : 400, fontSize: 13, textAlign: "left",
-                    fontFamily: "inherit",
-                    borderLeft: `3px solid ${isActive ? "#3b82f6" : "transparent"}`,
-                    transition: "all 0.12s",
-                  }}>
-                    <span style={{ fontSize: 15, width: 20, textAlign: "center", flexShrink: 0 }}>
-                      {item.icon}
-                    </span>
-                    {item.label}
-                  </button>
-                );
-              })}
+          }}>🏠</div>
+          {!isSidebarCollapsed && (
+            <div>
+              <div style={{ color: "#fff", fontWeight: 800, fontSize: 14.5, letterSpacing: "-0.02em" }}>MiniApart</div>
+              <div style={{ color: "rgba(255,255,255,0.38)", fontSize: 10, marginTop: 1 }}>Hệ thống quản lý</div>
             </div>
-          );
-        })}
-      </nav>
+          )}
+        </div>
 
-      {/* User + logout */}
-      <div style={{ padding: "10px", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-        <button onClick={onLogout} style={{
-          display: "flex", alignItems: "center", gap: 8,
-          width: "100%", padding: "8px 10px", borderRadius: 8,
-          border: "none", cursor: "pointer", background: "transparent",
-          color: "rgba(255,255,255,0.45)", fontSize: 12, fontFamily: "inherit",
-          transition: "all 0.12s",
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: "12px 10px" }}>
+          {groups.map(grp => {
+            const items = NAV_ITEMS.filter(n => n.group === grp.id);
+            return (
+              <div key={grp.id} style={{ marginBottom: 6 }}>
+                {!isSidebarCollapsed && (
+                  <div style={{
+                    fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.3)",
+                    letterSpacing: "0.1em", textTransform: "uppercase",
+                    padding: "10px 10px 5px",
+                  }}>
+                    {grp.label}
+                  </div>
+                )}
+                {items.map(item => {
+                  const isActive = active === item.id;
+                  return (
+                    <button key={item.id} onClick={() => onNavigate(item.id)} style={{
+                      display: "flex", alignItems: "center", gap: isSidebarCollapsed ? 0 : 9,
+                      width: "100%", padding: isSidebarCollapsed ? "9px 0" : "9px 10px", borderRadius: 8,
+                      border: "none", cursor: "pointer", marginBottom: 1,
+                      background: isActive ? "rgba(37,99,235,0.25)" : "transparent",
+                      color: isActive ? "#93c5fd" : "rgba(255,255,255,0.55)",
+                      fontWeight: isActive ? 600 : 400, fontSize: 13, textAlign: "left",
+                      fontFamily: "inherit",
+                      borderLeft: `3px solid ${isActive ? "#3b82f6" : "transparent"}`,
+                      transition: "all 0.12s",
+                    }}>
+                      <span style={{ fontSize: 15, width: 20, textAlign: "center", flexShrink: 0 }}>
+                        {item.icon}
+                      </span>
+                      {!isSidebarCollapsed && item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </nav>
+
+        {/* User + logout */}
+        <div style={{ padding: "10px", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+          <button onClick={onLogout} style={{
+            display: "flex", alignItems: "center", gap: 8,
+            width: "100%", padding: "8px 10px", borderRadius: 8,
+            border: "none", cursor: "pointer", background: "transparent",
+            color: "rgba(255,255,255,0.45)", fontSize: 12, fontFamily: "inherit",
+            transition: "all 0.12s",
+          }}
+            onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.15)"}
+            onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
+          >
+            <span style={{ fontSize: 15 }}>🚪</span>
+            {!isSidebarCollapsed && "Đăng xuất"}
+          </button>
+        </div>
+      </aside>
+
+      {/* Toggle button */}
+      <button 
+        onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        style={{
+          position: "absolute",
+          top: 10,
+          left: isSidebarCollapsed ? 10 : 236, // Adjust position based on sidebar state
+          zIndex: 1000,
+          background: "#2563eb",
+          color: "#fff",
+          border: "none",
+          borderRadius: "50%",
+          width: 30,
+          height: 30,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
         }}
-          onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.15)"}
-          onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
-        >
-          <span style={{ fontSize: 15 }}>🚪</span> Đăng xuất
-        </button>
-      </div>
-    </aside>
+      >
+        {isSidebarCollapsed ? "➡️" : "⬅️"}
+      </button>
+    </>
   );
 }
 
